@@ -25,6 +25,8 @@ class FCHistogramView: UIView {
     var unit: String?
     /// 柱形图的填充颜色
     var barCorlor: UIColor = .green
+    var barColors:[UIColor] = [UIColor]()
+    
     
 //-----------------可配置属性-----------------
     /// 是否显示每个y值， 默认显示
@@ -64,7 +66,7 @@ class FCHistogramView: UIView {
         return contentView
     }()
     /// 显示单位标签
-    fileprivate lazy var unitLab: UILabel = {
+    lazy var unitLab: UILabel = {
         let unitLab = UILabel()
         unitLab.font = UIFont.init(name: "Helvetica-Bold", size: 10)
         return unitLab
@@ -91,6 +93,25 @@ class FCHistogramView: UIView {
         // 添加手势
         contentViewAddTap()
     }
+    init(frame: CGRect, xValues: [String], yValues: [String], barW: CGFloat, gapW: CGFloat, yScaleV: CGFloat, yAxisNum: Int, unitStr: String, barBgCorlors: [UIColor]) {
+            super.init(frame: frame)
+            // 属性赋值
+            xValueArr = xValues
+            yValueArr = yValues
+            barWidth = barW
+            gapWidth = gapW
+            yScaleValue = yScaleV
+            yAxisCount = yAxisNum
+            unit = unitStr
+            barColors = barBgCorlors
+            unitLab.text = "单位：\(unitStr)"
+            // 添加控件
+            addSubview(scrollView)
+            scrollView.addSubview(contentView)
+            scrollView.addSubview(unitLab)
+            contentViewAddTap()
+        }
+    
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -235,10 +256,9 @@ extension FCHistogramView {
             barsEndPointsArr.add(value)
             // 绘制矩形
             let barLayer = CAShapeLayer()
-            // 如设置最大值，超过最大值则显示红色
-            if maxVlue > 0 && y > maxVlue {
-                barLayer.strokeColor = UIColor.red.cgColor
-            }else {
+            if barColors.count == yValueArr?.count {
+                barLayer.strokeColor = barColors[i].cgColor
+            }else{
                 barLayer.strokeColor = barCorlor.cgColor
             }
             
@@ -265,7 +285,11 @@ extension FCHistogramView {
             let label = UILabel()
             label.bounds =  CGRect(x: 0, y: 0, width: barWidth + gapWidth*4/5, height: 20)
             label.center = CGPoint(x: point!.x, y: point!.y - 10)
-            label.textColor = barCorlor
+            if barColors.count == xValueArr?.count {
+                label.textColor = barColors[i]
+            }else{
+                label.textColor = barCorlor
+            }
             label.text = "\(yValueArr![i])"
             label.textAlignment = .center
             label.font = UIFont.systemFont(ofSize: 10)
